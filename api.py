@@ -2,8 +2,8 @@ from os import environ
 
 import httpx
 
-from db import Tokens
-from schema import AthletesModel, TokensModel
+from db import Tokens, Activities
+from schema import AthletesModel, TokensModel, ActivitiesModel
 
 
 class Auth:
@@ -85,3 +85,41 @@ class Athlete(Auth):
         data["strava_updated_at"] = data.pop("updated_at")
         data = AthletesModel.parse_obj(data)
         return data
+
+class Activity(Auth):
+    def __init__(self, athlete_id: int = None, activity_id: int = None) -> None:
+        self.activity_id = activity_id
+        super().__init__(athlete_id)
+        if not self._get_token():
+            raise ValueError(
+                (
+                    "Your athlete don't grant access to our app.\n"
+                    "Get the tokens using the Auth class with a valid "
+                    "authorization code using the method authorization_token.\n"
+                    "g.e.:\n"
+                    ">>> auth = Auth()\n"
+                    '>>> data = auth.authorization_token(code="xxxxxxxxxxxx")\n'
+                    "Help: https://developers.strava.com/docs/authentication/\n"
+                    "or use https://www.strava.com/oauth/authorize?"
+                    "client_id=69072&response_type=code&"
+                    "redirect_uri=http://localhost/exchange_token&"
+                    "approval_prompt=force&"
+                    "scope=read,activity:read,activity:read_all,activity:write,profile:read_all"
+                )
+            )
+        self.token = self.refresh_token()
+
+    def _update_activity(self, data: ActivitiesModel) -> ActivitiesModel:
+            db = Activities()
+            if db.select(id=self.activity_id):
+                return db.update(data=data)
+            return db.insert(data=data)
+
+    def get(self, activity_id) -> dict:
+        url = self._uri + "/api/v3/activities/" + str(activity_id)
+        headers = {"Authorization": f"Bearer {self.token.access_token}"}
+        resp = httpx.get(url=url, headers=headers)
+        id = resp.json().pop("id")
+        data = ActivitiesModel.parse_obj({"id": id, **resp.json()})
+        self.activity_id = data.id
+        return self._update_activity(data=data)
