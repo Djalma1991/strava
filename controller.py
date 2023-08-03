@@ -3,15 +3,14 @@ from db import Athletes, Tokens, Activities
 import json
 
 
-def save_athlete():
+def save_athlete(athlete_id):
     db = Athletes()
-    api = Athlete(athlete_id=65927882)
+    api = Athlete(athlete_id)
     data = api.get()
-    save_data = db.insert(data)
-    return save_data
+    return print(db.select(athlete_id))
 
 
-def write_db(data: dict):
+def write_athlete(data: dict):
     db = Tokens()
     id = data.pop("athlete").get("id")
     if db.select(id=id):
@@ -20,9 +19,9 @@ def write_db(data: dict):
         data.update({"id": id})
         db.insert(values=data)
 
-def activities():   
-    api = Activity(athlete_id=65927882)
-    data = api.get(activity_id=9536701630)
+def activities(activity_id: int, athlete_id: int) -> dict:   
+    api = Activity(athlete_id=athlete_id)
+    data = api.get(activity_id=activity_id)
     return data
 
 def write_activity(data: dict):
@@ -34,3 +33,8 @@ def write_activity(data: dict):
     else:
         data.update({"id": id})
         db.insert(data_=data)
+
+def get_all_activities_time_range(before: int, after: int) -> list:
+    api = Activity(athlete_id=65927882)
+    data = api.get_all_activities(before=before, after=after)
+    return data
