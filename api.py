@@ -119,7 +119,9 @@ class Activity(Auth):
         url = self._uri + "/api/v3/activities/" + str(activity_id)
         headers = {"Authorization": f"Bearer {self.token.access_token}"}
         resp = httpx.get(url=url, headers=headers)
-        id = resp.json().pop("id")
-        data = ActivitiesModel.parse_obj({"id": id, **resp.json()})
+        temp = resp.json()
+        id = temp.pop("id")
+        temp["athlete"] = temp["athlete"].get("id")
+        data = ActivitiesModel.parse_obj({"id": id, **temp})
         self.activity_id = data.id
         return self._update_activity(data=data)

@@ -46,7 +46,7 @@ class AthletesModel(BaseModel):
 class ActivitiesModel(BaseModel):
     id: int
     name: str
-    athlete: dict
+    athlete: int
     resource_state: int
     distance: float
     moving_time: int

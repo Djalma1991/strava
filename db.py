@@ -119,9 +119,9 @@ class Athletes(DB):
 activities = sqlalchemy.Table(
     "activities",
     metadata,
-    sqlalchemy.Column("id", sqlalchemy.INT, primary_key=True, autoincrement=False),
+    sqlalchemy.Column("id", sqlalchemy.BIGINT, primary_key=True, autoincrement=False),
     sqlalchemy.Column("name", sqlalchemy.VARCHAR),
-    sqlalchemy.Column("athlete", sqlalchemy.JSON),
+    sqlalchemy.Column("athlete", sqlalchemy.BIGINT),
     sqlalchemy.Column("resource_state", sqlalchemy.INT),
     sqlalchemy.Column("distance", sqlalchemy.NUMERIC(10,4)),
     sqlalchemy.Column("moving_time", sqlalchemy.INT),
@@ -160,7 +160,7 @@ activities = sqlalchemy.Table(
     sqlalchemy.Column("private_note", sqlalchemy.VARCHAR),
     sqlalchemy.Column("pr_count", sqlalchemy.INT),
     sqlalchemy.Column("description", sqlalchemy.VARCHAR),
-    sqlalchemy.Column("gear_id", sqlalchemy.INT),
+    sqlalchemy.Column("gear_id", sqlalchemy.VARCHAR),
     sqlalchemy.Column("created_at", sqlalchemy.DateTime, default=datetime.now),
     sqlalchemy.Column(
         "updated_at", sqlalchemy.DateTime, default=datetime.now, onupdate=datetime.now
