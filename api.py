@@ -2,7 +2,7 @@ from os import environ
 
 import httpx
 
-from db import Tokens, Activities
+from db import Tokens, Activities, Athletes
 from schema import AthletesModel, TokensModel, ActivitiesModel
 
 
@@ -76,7 +76,17 @@ class Athlete(Auth):
             )
         self.token = self.refresh_token()
 
-    def get(self) -> dict:
+    def _get_athlete(self):
+        db = Athletes()
+        return db.select(id=self.athlete_id)
+    
+    def _update_athlete(self, data: AthletesModel) -> AthletesModel:
+        db = Athletes()
+        if db.select(id=self.athlete_id):
+            return db.update(data=data)
+        return db.insert(data=data)
+
+    def get(self) -> AthletesModel:
         url = self._uri + "/api/v3/athlete"
         headers = {"Authorization": f"Bearer {self.token.access_token}"}
         resp = httpx.get(url=url, headers=headers)
@@ -84,12 +94,12 @@ class Athlete(Auth):
         data["strava_created_at"] = data.pop("created_at")
         data["strava_updated_at"] = data.pop("updated_at")
         data = AthletesModel.parse_obj(data)
-        return data
+        return self._update_athlete(data=data)
 
 class Activity(Auth):
-    def __init__(self, athlete_id: int = None, activity_id: int = None) -> None:
-        self.activity_id = activity_id
+    def __init__(self, athlete_id: int, activity_id: int = None) -> None:
         super().__init__(athlete_id)
+        super().__init__(activity_id)
         if not self._get_token():
             raise ValueError(
                 (
@@ -115,13 +125,34 @@ class Activity(Auth):
                 return db.update(data=data)
             return db.insert(data=data)
 
-    def get(self, activity_id) -> dict:
-        url = self._uri + "/api/v3/activities/" + str(activity_id)
+    def get(self) -> dict:
+        url = self._uri + "/api/v3/activities/" + str(self.activity_id)
         headers = {"Authorization": f"Bearer {self.token.access_token}"}
         resp = httpx.get(url=url, headers=headers)
         temp = resp.json()
         id = temp.pop("id")
         temp["athlete"] = temp["athlete"].get("id")
         data = ActivitiesModel.parse_obj({"id": id, **temp})
-        self.activity_id = data.id
         return self._update_activity(data=data)
+    
+    def get_all_activities(self, before, after) -> list:
+        self.before = before
+        self.after = after
+        params = {
+            **self._params,
+            "before": before,
+            "after": after
+        }
+        url = self._uri + "/api/v3/athlete/activities"
+        headers = {"Authorization": f"Bearer {self.token.access_token}"}
+        resp = httpx.get(url=url, headers=headers, params=params)
+        temp = resp.json()
+        ids = []
+        i = 0
+        while "id" in temp[i]:
+            ids.append(temp[i]["id"])
+            temp[i].pop("id")
+            i += i
+        return ids
+
+        

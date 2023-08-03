@@ -67,15 +67,15 @@ class ActivitiesModel(BaseModel):
     visibility: str
     max_speed: float
     average_speed: float
-    average_temp: float
+    average_temp: float = None
     average_cadence: float
     average_watts: float
     weighted_average_watts: float
     kilojoules: float
     device_watts: int
     has_heartrate: bool
-    elev_high: float
-    elev_low: float
+    elev_high: float = None
+    elev_low: float = None
     calories: float
     segment_efforts: list
     laps: list
