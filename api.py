@@ -97,9 +97,9 @@ class Athlete(Auth):
         return self._update_athlete(data=data)
 
 class Activity(Auth):
-    def __init__(self, athlete_id: int, activity_id: int = None) -> None:
+    def __init__(self, athlete_id: int = None, activity_id: int = None) -> None:
         super().__init__(athlete_id)
-        super().__init__(activity_id)
+        self.activity_id = activity_id
         if not self._get_token():
             raise ValueError(
                 (
@@ -141,7 +141,8 @@ class Activity(Auth):
         params = {
             **self._params,
             "before": before,
-            "after": after
+            "after": after,
+            "per_page": 99
         }
         url = self._uri + "/api/v3/athlete/activities"
         headers = {"Authorization": f"Bearer {self.token.access_token}"}
@@ -149,10 +150,10 @@ class Activity(Auth):
         temp = resp.json()
         ids = []
         i = 0
-        while "id" in temp[i]:
+        while i < len(temp):
             ids.append(temp[i]["id"])
             temp[i].pop("id")
-            i += i
+            i = i + 1
         return ids
 
         
