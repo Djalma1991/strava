@@ -33,7 +33,7 @@ def write_activity(data: dict):
         data.update({"id": id})
         db.insert(data_=data)
 
-def get_all_activities_time_range(athlete_id: int, before: int, after: int) -> list:
+def get_all_activities_time_range(athlete_id: int, before: int = None, after: int = None) -> list:
     api = Activity(athlete_id=athlete_id)
     data = api.get_all_activities(before=before, after=after)
     return data

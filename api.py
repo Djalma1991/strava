@@ -138,12 +138,20 @@ class Activity(Auth):
     def get_all_activities(self, before, after) -> list:
         self.before = before
         self.after = after
-        params = {
-            **self._params,
-            "before": before,
-            "after": after,
-            "per_page": 99
-        }
+        if before is None:
+            params = {
+                **self._params,
+                "before": before,
+                "after": after,
+                "per_page": 99
+            }
+        else:
+            params = {
+                **self._params,
+                "before": before,
+                "after": after,
+                "per_page": 99
+            }
         url = self._uri + "/api/v3/athlete/activities"
         headers = {"Authorization": f"Bearer {self.token.access_token}"}
         resp = httpx.get(url=url, headers=headers, params=params)
