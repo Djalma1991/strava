@@ -192,3 +192,10 @@ class Activities(DB):
         item = self.activities.select().where(self.activities.c.id == int(id))
         result = self.conn.execute(item).first()
         return ActivitiesModel.from_orm(result) if result else None
+    
+    def select_activities_without_gear(self, ride: str) -> dict:
+        data = self.activities.select().where((self.activities.c.type == ride) &
+                                              (self.activities.c.gear_id == None)
+                                            )
+        result = self.conn.execute(data).all()
+        return result

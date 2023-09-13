@@ -1,5 +1,5 @@
 from api import Athlete, Activity
-from db import Athletes, Tokens, Activities
+from db import Tokens, Activities
 import json
 
 
@@ -36,4 +36,19 @@ def write_activity(data: dict):
 def get_all_activities_time_range(athlete_id: int, before: int = None, after: int = None) -> list:
     api = Activity(athlete_id=athlete_id)
     data = api.get_all_activities(before=before, after=after)
+    return data
+
+def update_gear_in_strava(athlete_id: int, gear_id: str):
+    db = Activities()
+    app = Activity(athlete_id=athlete_id)
+    data = db.select_activities_without_gear(ride='Ride')
+    activities_to_update = []
+    for _ in data:
+        activities_to_update.append(
+            {"id": _.id,
+             "gear_id": gear_id}
+        )
+    for activity in activities_to_update:
+        app.update_activity(id=activity["id"], 
+                            data={"gear_id": activity["gear_id"]})
     return data

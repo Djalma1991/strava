@@ -164,4 +164,10 @@ class Activity(Auth):
             i = i + 1
         return ids
 
+    def update_activity(self, id: int, data: dict) -> int:
+        url = self._uri + "/api/v3/activities/" + str(id)
+        headers = {"Authorization": f"Bearer {self.token.access_token}"}
+        body = data
+        resp = httpx.put(url=url, headers=headers, data=body)
+        return resp.status_code
         
